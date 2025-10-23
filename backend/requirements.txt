@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+openai-whisper
+fuzzywuzzy
+python-Levenshtein
+google-generativeai
