@@ -1,34 +1,122 @@
 {
   "criteria": [
     {
-      "id": 1,
-      "description": "Agent greeted the guest properly with enthusiasm",
-      "keywords": ["thank you for calling", "my name is", "how can I help you"],
+      "id": "1.1",
+      "category": "Readiness",
+      "description": "Agent is ready and available to receive call",
+      "guideline": "Agent answers the call promptly and is available to assist.",
+      "keywords": ["answer", "ready", "available", "pick up", "on the line"],
+      "alternative_phrases": [
+        "thanks for holding",
+        "I'm here to help",
+        "you're through to reservations"
+      ],
+      "score": 2
+    },
+    {
+      "id": "1.2",
+      "category": "Greeting",
+      "description": "Must open the conversation with correct introduction",
+      "guideline": "Thank you for calling Hotel Reservations, my name is [Name]. How may I assist you?",
+      "keywords": ["thank you for calling", "hotel reservations", "my name is", "how may i assist you"],
+      "alternative_phrases": [
+        "thanks for calling hotel reservations",
+        "this is [Name] how can i help",
+        "welcome to hotel reservations"
+      ],
+      "score": 4
+    },
+    {
+      "id": "1.3",
+      "category": "Acknowledgment",
+      "description": "Acknowledge guest's request, reiterating guest needs",
+      "guideline": "Agent acknowledges and restates the caller’s reason to confirm understanding.",
+      "keywords": ["i understand", "you’re calling about", "i see that you need", "let me confirm your request"],
+      "alternative_phrases": [
+        "just to confirm you’re asking about",
+        "i get that you’re having an issue with",
+        "so the reason for your call is"
+      ],
+      "score": 4
+    },
+    {
+      "id": "1.4",
+      "category": "Verification",
+      "description": "Confirm and provide all relevant information before any process",
+      "guideline": "Agent verifies guest first/last name, itinerary number, hotel name and dates before proceeding.",
+      "keywords": ["itinerary number", "guest name", "booking dates", "hotel name", "verify details"],
+      "alternative_phrases": [
+        "may i have your reservation or itinerary number",
+        "can i confirm the name on the booking",
+        "let me verify your check-in and check-out dates"
+      ],
       "score": 10
     },
     {
-      "id": 2,
-      "description": "Agent confirmed itinerary number or guest name",
-      "keywords": ["itinerary", "guest name", "reservation number"],
+      "id": "1.5",
+      "category": "Efficiency",
+      "description": "Call efficiency and expectation setting",
+      "guideline": "Agent works efficiently and sets clear expectations (e.g., hold time, steps).",
+      "keywords": ["hold for", "i'll be right back", "this will take about", "here’s what to expect"],
+      "alternative_phrases": [
+        "i’ll place you on a brief hold",
+        "this should take around two minutes",
+        "i’ll keep you updated if it takes longer"
+      ],
       "score": 10
     },
     {
-      "id": 3,
-      "description": "Agent demonstrated empathy and understanding",
-      "keywords": ["i understand", "no worries", "happy to help", "let me check that for you"],
-      "score": 10
+      "id": "1.6",
+      "category": "Ownership",
+      "description": "Explore solutions/alternatives and show ownership of the call",
+      "guideline": "Agent explores all options, follows processes, and takes ownership.",
+      "keywords": ["what we can do", "options", "alternatives", "i will take care", "let me handle"],
+      "alternative_phrases": [
+        "here are your options",
+        "another solution is",
+        "i’ll own this and get it resolved"
+      ],
+      "score": 15
     },
     {
-      "id": 4,
-      "description": "Agent provided a clear resolution or next step",
-      "keywords": ["you can use", "please visit", "you will receive", "follow these steps"],
-      "score": 10
+      "id": "1.7",
+      "category": "Telephone Technique",
+      "description": "Professional tone; avoid jargon/slang/abbreviations",
+      "guideline": "Agent maintains professional, courteous tone without jargon or slang.",
+      "keywords": ["professional", "courteous", "polite", "clear language"],
+      "alternative_phrases": [
+        "certainly / absolutely (used professionally)",
+        "happy to assist",
+        "let me clarify that for you"
+      ],
+      "score": 15
     },
     {
-      "id": 5,
-      "description": "Agent closed the call professionally",
-      "keywords": ["thank you for calling", "have a great day", "appreciate your time"],
-      "score": 10
+      "id": "1.8",
+      "category": "Documentation",
+      "description": "Properly document notes",
+      "guideline": "Agent documents notes/actions accurately per process.",
+      "keywords": ["documented", "noted", "added notes", "case updated"],
+      "alternative_phrases": [
+        "i’ve updated your reservation notes",
+        "adding a note now",
+        "this is recorded on your booking"
+      ],
+      "score": 25
+    },
+    {
+      "id": "1.9",
+      "category": "Recap & Expectations",
+      "description": "Recap all relevant information and outcomes, set clear expectations",
+      "guideline": "Agent summarizes actions/outcomes and confirms next steps and expectations.",
+      "keywords": ["to recap", "summary", "next step", "expectations", "you will receive"],
+      "alternative_phrases": [
+        "just to summarize what we did",
+        "the next step is",
+        "you should get an email/confirmation"
+      ],
+      "score": 15
     }
-  ]
+  ],
+  "total_points": 100
 }

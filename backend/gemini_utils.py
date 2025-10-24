@@ -1,33 +1,42 @@
+# backend/gemini_utils.py
+import os
 import google.generativeai as genai
 
-# ✅ Gemini API key (replace with yours if needed)
-GEMINI_API_KEY = "AIzaSyDW9mmnncI33SqwVQ7QVXWwjvrwggGU30Y"
+# Read key from environment (preferred)
+API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 
-# Configure Gemini
-genai.configure(api_key=GEMINI_API_KEY)
+# Configure only if we have a key
+if API_KEY:
+    genai.configure(api_key=API_KEY)
 
-def analyze_with_gemini(transcript: str):
-    """
-    Analyze transcript using Gemini and return summarized QA feedback.
-    """
+MODEL_NAME = "models/gemini-2.5-flash"
+
+def analyze_with_gemini(masked_transcript: str) -> str:
+    if not masked_transcript:
+        return "Transcript was empty."
+    if not API_KEY:
+        return ("Gemini API key missing. Set GEMINI_API_KEY environment variable "
+                "and restart the backend.")
+
     prompt = f"""
-You are a professional Quality Assurance Coach for HotelPlanner's call centers.
+You are a QA coach for hotel reservations calls.
 
-Analyze the following call transcript and provide:
-1. The reason for the call.
-2. What the agent did wrong (if anything).
-3. How the agent can improve.
-4. The agent's tone and professionalism.
+Transcript (PII-masked):
+\"\"\"{masked_transcript}\"\"\"
 
-Keep it short, objective, and easy to read.
+Provide 4–6 bullet points:
+- Call reason
+- What the agent did well (map to behaviors)
+- What was incorrect or missing (map to behaviors)
+- Concrete, actionable improvements
 
-TRANSCRIPT:
-{transcript}
-    """
+Be concise and specific.
+"""
 
     try:
-        model = genai.GenerativeModel("models/gemini-2.5-flash")
-        response = model.generate_content(prompt)
-        return response.text or "No feedback generated."
+        model = genai.GenerativeModel(MODEL_NAME)
+        resp = model.generate_content(prompt)
+        text = getattr(resp, "text", "") or ""
+        return text.strip() if text.strip() else "No AI suggestions available."
     except Exception as e:
-        return f"Error analyzing with Gemini: {e}"
+        return f"AI analysis error: {e}"
