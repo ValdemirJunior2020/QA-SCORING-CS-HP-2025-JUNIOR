@@ -6,14 +6,22 @@ import json
 import re
 import asyncio
 from rapidfuzz import fuzz
-from gemini_utils import analyze_with_gemini
+
+# Load .env before importing gemini_utils (so env is ready if you also use it at import)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
+
+from gemini_utils import analyze_with_gemini, gemini_health
 
 app = FastAPI()
 
 # --- CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten later
+    allow_origins=["*"],  # tighten for prod
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,7 +36,7 @@ if not os.path.exists(CRITERIA_PATH):
 with open(CRITERIA_PATH, "r", encoding="utf-8") as f:
     QA_CRITERIA = json.load(f)
 
-# --- Whisper ---
+# --- Whisper (tiny for speed) ---
 print("Loading Whisper model: tiny")
 WHISPER_MODEL = whisper.load_model("tiny")
 print("Whisper ready.")
@@ -58,7 +66,7 @@ def luhn_check(number: str) -> bool:
 def normalize_spoken_email(text: str) -> str:
     t = re.sub(r"(?i)\s+at\s+", "@", text)
     t = re.sub(r"(?i)\s+dot\s+", ".", t)
-    t = re.sub(r"(?i)\b([a-z])\s+(?=[a-z]\b)", r"\1", t)  # join spelled letters
+    t = re.sub(r"(?i)\b([a-z])\s+(?=[a-z]\b)", r"\1", t)
     t = re.sub(r"(?i)(@)\s+", r"\1", t)
     t = re.sub(r"(?i)\.\s+", ".", t)
     return t
@@ -72,13 +80,12 @@ def redact_phones(text: str) -> str:
 def redact_names_after_cues(text: str) -> str:
     def repl(m):
         return f"{m.group(1)} [NAME]"
-    # (THIS WAS THE LINE WITH THE MISSING PAREN BEFORE)
     return NAME_CUE_RE.sub(repl, text)
 
 def redact_cards(text: str) -> str:
     def repl(m):
         s = m.group(0)
-        if ITINERARY_RE.search(s):  # don’t touch itinerary numbers like H12345678
+        if ITINERARY_RE.search(s):  # keep itinerary IDs (e.g., H12345678)
             return s
         digits = "".join(ch for ch in s if ch.isdigit())
         if luhn_check(digits):
@@ -90,12 +97,13 @@ def sanitize_transcript(raw: str) -> str:
     if not raw:
         return raw
     t = raw
-    # Temporarily protect itinerary IDs
     placeholders = {}
+
     def protect_itin(m):
         key = f"__ITIN__{len(placeholders)}__"
         placeholders[key] = m.group(0)
         return key
+
     t = ITINERARY_RE.sub(protect_itin, t)
 
     t = normalize_spoken_email(t)
@@ -104,7 +112,6 @@ def sanitize_transcript(raw: str) -> str:
     t = redact_phones(t)
     t = redact_names_after_cues(t)
 
-    # Restore itineraries
     for k, v in placeholders.items():
         t = t.replace(k, v)
     return t
@@ -252,6 +259,19 @@ def score_with_breakdown(transcript: str, criteria: dict):
 @app.get("/")
 async def root():
     return {"message": "QA Scoring API is running"}
+
+@app.get("/gemini/health")
+async def gemini_health_check():
+    return gemini_health()
+
+@app.get("/debug/env")
+async def debug_env():
+    key = (os.getenv("GEMINI_API_KEY") or "")
+    return {
+        "key_present": bool(key),
+        "key_prefix": (key[:6] + "…" if key else ""),
+        "has_dotenv": True
+    }
 
 # Accept both /upload and /upload/
 @app.post("/upload")
